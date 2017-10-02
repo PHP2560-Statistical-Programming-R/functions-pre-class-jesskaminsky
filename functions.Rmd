@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
 ```
 
 
@@ -98,26 +99,31 @@ standardize.me <- function(x) {
 
 B. Assign all the numeric columns of the original WCGS dataset to a new dataset called WCGS.new.
 ```{r}
-WCGS.new <- wcgs
+numeric_cols <- sapply(wcgs, is.numeric)
+WCGS.new <- wcgs[,numeric_cols]
 ```
 
 C. Using a loop and your new function, standardize all the variables WCGS.new dataset.
 ```{r}
+for(i in seq_along(WCGS.new)) {
+    WCGS.new[[i]] <- standardize.me(WCGS.new[[i]])
+}
+```
+
+```{r, eval=F}
+#### if we do not want to standardize the ID column ####
 for(i in 2:ncol(WCGS.new)) {
-  if(class(WCGS.new[[i]]) %in% c("integer","numeric")) {
-    WCGS.new[[i]] <- standardize.me(wcgs[[i]])
-  }
+    WCGS.new[[i]] <- standardize.me(WCGS.new[[i]])
 }
 ```
 
 D. What should the mean and standard deviation of all your new standardized variables be? Test your prediction by running a loop
 - The mean and standard deviation should now be 0 and 1, respectively.
 ```{r}
-for(i in 2:ncol(WCGS.new)) {
-  if(class(WCGS.new[[i]]) %in% c("integer","numeric")) {
-    print(mean(WCGS.new[[i]], na.rm = TRUE))
-    print(sd(WCGS.new[[i]], na.rm = TRUE))
-  }
+for(i in seq_along(WCGS.new)) {
+  print(names(WCGS.new)[i])
+  print(mean(WCGS.new[[i]], na.rm = TRUE))
+  print(sd(WCGS.new[[i]], na.rm = TRUE))
 }
 ```
 
@@ -137,6 +143,5 @@ B. Now do the samething, but now don’t use a loop
 ```{r}
 aggregate(list(Mean.Weight =wcgs$weight), list(CHD.Type = wcgs$typchd69), mean)
 ####OR#####
-library(dplyr)
 wcgs %>% group_by(typchd69) %>% summarise(mean(weight))
 ```
